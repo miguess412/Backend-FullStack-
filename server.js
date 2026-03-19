@@ -12,6 +12,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+// Importar rutas
+app.use('/api/auth', require('./routes/auth.routes'));
+
 // Ruta de prueba
 app.get('/', (req, res) => {
     res.json({ message: '🚀 API de ISP-Manager funcionando' });
