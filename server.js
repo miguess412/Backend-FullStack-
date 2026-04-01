@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Importar rutas
 app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/dashboard', require('./routes/dashboard.routes'));
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -33,7 +34,7 @@ const startServer = async () => {
         await testConnection();
         
         // Sincronizar modelos con la base de datos
-        await sequelize.sync({ alter: true });
+        await sequelize.sync({ alter: false });
         console.log('✅ Modelos sincronizados');
         
         // Iniciar servidor
