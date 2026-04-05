@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/dashboard', require('./routes/dashboard.routes'));
 app.use('/api/cliente', require('./routes/cliente.routes'));
+app.use('/api/admin/clientes', require('./routes/admin/clientes.routes'));
 
 // Ruta de prueba
 app.get('/', (req, res) => {
