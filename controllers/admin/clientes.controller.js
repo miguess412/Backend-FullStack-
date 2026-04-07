@@ -1,8 +1,12 @@
 const { User, Client, Plan } = require('../../models');
 const bcrypt = require('bcryptjs');
+const logger = require('../../config/logger');
 
 // Obtener todos los clientes
 exports.getClientes = async (req, res) => {
+    const userId = req.userId;
+    logger.info(`📋 Usuario ${userId} solicitó lista de clientes`);
+    
     try {
         const clientes = await Client.findAll({
             include: [
@@ -34,29 +38,32 @@ exports.getClientes = async (req, res) => {
             } : null
         }));
         
+        logger.info(`✅ Lista de clientes enviada - Total: ${resultado.length} clientes`);
         res.json(resultado);
+        
     } catch (error) {
-        console.error('Error en getClientes:', error);
+        logger.error(`❌ Error al obtener clientes - Usuario: ${userId}`, error);
         res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
 // Crear nuevo cliente
 exports.crearCliente = async (req, res) => {
+    const userId = req.userId;
+    const { nombre, email, password, telefono, direccion, ciudad, plan_id } = req.body;
+    
+    logger.info(`👤 Usuario ${userId} intenta crear nuevo cliente: ${nombre} (${email})`);
+    
     try {
-        const { nombre, email, password, telefono, direccion, ciudad, plan_id } = req.body;
-        
-        // Verificar si el email ya existe
         const existeUsuario = await User.findOne({ where: { email } });
         if (existeUsuario) {
+            logger.warn(`⚠️ Intento de crear cliente con email existente: ${email}`);
             return res.status(400).json({ message: 'El email ya está registrado' });
         }
         
-        // Encriptar la contraseña
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
         
-        // Crear el usuario (rol_id = 2 es cliente)
         const usuario = await User.create({
             nombre,
             email,
@@ -66,7 +73,6 @@ exports.crearCliente = async (req, res) => {
             activo: true
         });
         
-        // Crear el cliente asociado al usuario
         const cliente = await Client.create({
             user_id: usuario.id,
             direccion,
@@ -75,6 +81,7 @@ exports.crearCliente = async (req, res) => {
             plan_id: plan_id || null
         });
         
+        logger.info(`✅ Cliente creado exitosamente: ${nombre} (${email}) - ID: ${cliente.id}`);
         res.status(201).json({
             id: cliente.id,
             nombre: usuario.nombre,
@@ -86,64 +93,67 @@ exports.crearCliente = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Error en crearCliente:', error);
+        logger.error(`❌ Error al crear cliente ${email}:`, error);
         res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
 // Actualizar cliente
 exports.actualizarCliente = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.userId;
+    const { nombre, email, telefono, direccion, ciudad, plan_id, activo, password } = req.body;
+    
+    logger.info(`✏️ Usuario ${userId} intenta actualizar cliente ID: ${id}`);
+    
     try {
-        const { id } = req.params;
-        const { nombre, email, telefono, direccion, ciudad, plan_id, activo, password } = req.body;
-        
-        // Buscar el cliente
         const cliente = await Client.findByPk(id);
         if (!cliente) {
+            logger.warn(`⚠️ Intento de actualizar cliente inexistente ID: ${id}`);
             return res.status(404).json({ message: 'Cliente no encontrado' });
         }
         
-        // Preparar datos del usuario
         const userData = { nombre, email, telefono, activo };
         
-        // Si se proporcionó una nueva contraseña, encriptarla
         if (password && password.trim() !== '') {
             const salt = await bcrypt.genSalt(10);
             userData.password_hash = await bcrypt.hash(password, salt);
+            logger.info(`🔐 Contraseña actualizada para cliente ID: ${id}`);
         }
         
-        // Actualizar el usuario asociado
         await User.update(userData, { where: { id: cliente.user_id } });
-        
-        // Actualizar el cliente
         await cliente.update({ direccion, ciudad, plan_id });
         
+        logger.info(`✅ Cliente ID ${id} actualizado correctamente por usuario ${userId}`);
         res.json({ message: 'Cliente actualizado correctamente' });
         
     } catch (error) {
-        console.error('Error en actualizarCliente:', error);
+        logger.error(`❌ Error al actualizar cliente ID ${id}:`, error);
         res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
 // Eliminar cliente
 exports.eliminarCliente = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.userId;
+    
+    logger.warn(`⚠️ Usuario ${userId} intenta eliminar cliente ID: ${id}`);
+    
     try {
-        const { id } = req.params;
-        
-        // Buscar el cliente
         const cliente = await Client.findByPk(id);
         if (!cliente) {
+            logger.warn(`⚠️ Intento de eliminar cliente inexistente ID: ${id}`);
             return res.status(404).json({ message: 'Cliente no encontrado' });
         }
         
-        // Eliminar el usuario (en cascada se elimina el cliente también)
         await User.destroy({ where: { id: cliente.user_id } });
         
+        logger.warn(`🗑️ Cliente ID ${id} eliminado por usuario ${userId}`);
         res.json({ message: 'Cliente eliminado correctamente' });
         
     } catch (error) {
-        console.error('Error en eliminarCliente:', error);
+        logger.error(`❌ Error al eliminar cliente ID ${id}:`, error);
         res.status(500).json({ message: 'Error del servidor' });
     }
 };
