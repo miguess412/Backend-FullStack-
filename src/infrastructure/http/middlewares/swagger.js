@@ -13,13 +13,23 @@ const options = {
                 url: 'http://localhost:3000',
                 description: 'Servidor de desarrollo'
             }
-        ]
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
+                }
+            }
+        },
+        security: [{ bearerAuth: [] }]
     },
+    // ACTUALIZA LAS RUTAS A LAS NUEVAS UBICACIONES
     apis: [
-        './routes/*.js',
-        './routes/admin/*.js',
-        './routes/cliente/*.js']
-    
+        './src/infrastructure/http/routes/*.js',
+        './src/infrastructure/http/routes/admin/*.js'
+    ]
 };
 
 module.exports = swaggerJsdoc(options);

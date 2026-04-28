@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User, Role } = require('../models');
-const logger = require('../config/logger');
+const { User, Role } = require('../../../domain/entities');  // ← Ruta a los modelos movidos
+const logger = require('../../http/middlewares/logger');
 
 exports.login = async (req, res) => {
     const startTime = Date.now();

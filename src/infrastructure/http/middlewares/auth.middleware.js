@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken');
 
+// Después (igual, no cambia, solo si usas el nuevo jwt.js)
+// const { verifyToken } = require('../../auth/jwt');
+
 // Verificar token JWT
 exports.verifyToken = (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1]; // Bearer TOKEN

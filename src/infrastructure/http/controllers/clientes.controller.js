@@ -1,7 +1,6 @@
-const { User, Client, Plan } = require('../../models');
+const { User, Client, Plan } = require('../../../domain/entities');
 const bcrypt = require('bcryptjs');
-const logger = require('../../config/logger');
-
+const logger = require('../../http/middlewares/logger');
 // Obtener todos los clientes
 exports.getClientes = async (req, res) => {
     const userId = req.userId;

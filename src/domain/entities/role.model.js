@@ -1,6 +1,5 @@
-@"
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
+﻿const { DataTypes } = require('sequelize');
+const { sequelize } = require('../../infrastructure/database/sequelize');
 
 const Role = sequelize.define('Role', {
     id: {
@@ -24,4 +23,3 @@ const Role = sequelize.define('Role', {
 });
 
 module.exports = Role;
-"@ | Out-File -FilePath models\role.model.js -Encoding utf8

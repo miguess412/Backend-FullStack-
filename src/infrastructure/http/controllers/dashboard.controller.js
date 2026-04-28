@@ -1,5 +1,6 @@
-const { User, Client, Invoice, Ticket, Plan } = require('../models');
+const { User, Client, Invoice, Ticket, Plan } = require('../../../domain/entities');
 const { Op } = require('sequelize');
+const logger = require('../../http/middlewares/logger');
 
 // Obtener estadísticas del dashboard
 exports.getStats = async (req, res) => {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const clientesController = require('../../controllers/admin/clientes.controller');
+const clientesController = require('../../controllers/clientes.controller');
 const { verifyToken, isAdmin } = require('../../middlewares/auth.middleware');
 
 // Todas las rutas requieren autenticación y rol de administrador

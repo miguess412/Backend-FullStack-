@@ -1,4 +1,5 @@
-const { User, Client, Plan, Invoice, Ticket } = require('../models');
+const { User, Client, Plan, Invoice, Ticket } = require('../../../domain/entities');
+const logger = require('../../http/middlewares/logger');
 
 // Obtener facturas del cliente autenticado
 exports.getMisFacturas = async (req, res) => {
