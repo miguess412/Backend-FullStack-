@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User, Role } = require('../../../domain/entities');  // ← Ruta a los modelos movidos
+const { User, Role } = require('../../../domain/entities');
 const logger = require('../../http/middlewares/logger');
+const loggerBD = require('../../http/middlewares/logger-bd');
 
 exports.login = async (req, res) => {
     const startTime = Date.now();
@@ -17,12 +18,16 @@ exports.login = async (req, res) => {
 
         if (!user) {
             logger.warn(`⚠️ Login fallido - Usuario no existe: ${email}`);
+            // LOG IMPORTANTE EN BD
+            await loggerBD.loginFallido(email, req);
             return res.status(401).json({ message: 'Credenciales incorrectas' });
         }
 
         const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
             logger.warn(`⚠️ Login fallido - Contraseña incorrecta para: ${email}`);
+            // LOG IMPORTANTE EN BD
+            await loggerBD.loginFallido(email, req);
             return res.status(401).json({ message: 'Credenciales incorrectas' });
         }
 
@@ -34,6 +39,9 @@ exports.login = async (req, res) => {
 
         const duration = Date.now() - startTime;
         logger.info(`✅ Login exitoso: ${email} (rol: ${user.Role?.nombre}) - ${duration}ms`);
+        
+        // LOG IMPORTANTE EN BD (LOGIN EXITOSO)
+        await loggerBD.loginExitoso(email, req, user.id);
 
         res.json({
             token,
@@ -48,6 +56,8 @@ exports.login = async (req, res) => {
 
     } catch (error) {
         logger.error(`❌ Error en login para ${email}:`, error);
+        // LOG IMPORTANTE EN BD (ERROR)
+        await loggerBD.errorSistema(error.message, req, email);
         res.status(500).json({ message: 'Error del servidor' });
     }
 };

@@ -1,6 +1,8 @@
 const { User, Client, Plan } = require('../../../domain/entities');
 const bcrypt = require('bcryptjs');
 const logger = require('../../http/middlewares/logger');
+const loggerBD = require('../../http/middlewares/logger-bd');
+
 // Obtener todos los clientes
 exports.getClientes = async (req, res) => {
     const userId = req.userId;
@@ -81,6 +83,15 @@ exports.crearCliente = async (req, res) => {
         });
         
         logger.info(`✅ Cliente creado exitosamente: ${nombre} (${email}) - ID: ${cliente.id}`);
+        
+        // ✅ LOG IMPORTANTE EN BD - CORREGIDO (antes de enviar respuesta)
+        await loggerBD.clienteCreado(
+            { nombre: usuario.nombre, email: usuario.email },
+            req.userId,
+            req.userEmail,
+            req
+        );
+        
         res.status(201).json({
             id: cliente.id,
             nombre: usuario.nombre,
@@ -124,6 +135,10 @@ exports.actualizarCliente = async (req, res) => {
         await cliente.update({ direccion, ciudad, plan_id });
         
         logger.info(`✅ Cliente ID ${id} actualizado correctamente por usuario ${userId}`);
+        
+        // ✅ LOG IMPORTANTE EN BD - AGREGADO
+        await loggerBD.clienteActualizado(id, req.userId, req.userEmail, req);
+        
         res.json({ message: 'Cliente actualizado correctamente' });
         
     } catch (error) {
@@ -146,9 +161,17 @@ exports.eliminarCliente = async (req, res) => {
             return res.status(404).json({ message: 'Cliente no encontrado' });
         }
         
+        // Obtener email del cliente antes de eliminarlo (para el log)
+        const user = await User.findByPk(cliente.user_id);
+        const clienteEmail = user?.email || 'desconocido';
+        
         await User.destroy({ where: { id: cliente.user_id } });
         
         logger.warn(`🗑️ Cliente ID ${id} eliminado por usuario ${userId}`);
+        
+        // ✅ LOG IMPORTANTE EN BD - AGREGADO
+        await loggerBD.clienteEliminado(id, clienteEmail, req.userId, req.userEmail, req);
+        
         res.json({ message: 'Cliente eliminado correctamente' });
         
     } catch (error) {
