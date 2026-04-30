@@ -36,12 +36,12 @@ exports.getStats = async (req, res) => {
 
         // Datos de los últimos 5 clientes registrados
         const ultimosClientes = await Client.findAll({
-            limit: 5,
+            //limit: 5,
             order: [['fecha_registro', 'DESC']],
             include: [
                 {
                     model: User,
-                    attributes: ['nombre', 'email', 'telefono']
+                    attributes: ['nombre', 'email', 'telefono', 'activo']
                 },
                 {
                     model: Plan,
@@ -52,7 +52,7 @@ exports.getStats = async (req, res) => {
 
         // Datos de las últimas 5 facturas
         const ultimasFacturas = await Invoice.findAll({
-            limit: 5,
+            //limit: 5,
             order: [['fecha_emision', 'DESC']],
             include: [
                 {
@@ -67,6 +67,7 @@ exports.getStats = async (req, res) => {
             ]
         });
 
+        //mapeo de clientes
         res.json({
             success: true,
             data: {
@@ -75,13 +76,22 @@ exports.getStats = async (req, res) => {
                 totalPendiente,
                 ticketsAbiertos,
                 ultimosClientes: ultimosClientes.map(c => ({
-                    id: c.id,
-                    nombre: c.User?.nombre || 'Sin nombre',
-                    email: c.User?.email || 'Sin email',
-                    telefono: c.User?.telefono || 'Sin teléfono',
-                    plan: c.Plan?.nombre || 'Sin plan',
-                    fecha_registro: c.fecha_registro
+                id: c.id,
+                nombre: c.User.nombre,
+                email: c.User.email,
+                telefono: c.User.telefono,
+                direccion: c.direccion || 'No registrada',    
+                ciudad: c.ciudad || 'No registrada',          
+                fecha_registro: c.fecha_registro,
+                activo: c.User.activo === 1 || c.User.activo === true,  // ← Convertir a booleano
+                plan: c.Plan ? {
+                    id: c.Plan.id,
+                    nombre: c.Plan.nombre,
+                    velocidad: c.Plan.velocidad,
+                    precio: c.Plan.precio
+                } : null
                 })),
+                
                 ultimasFacturas: ultimasFacturas.map(f => ({
                     id: f.id,
                     cliente: f.Client?.User?.nombre || 'Cliente desconocido',

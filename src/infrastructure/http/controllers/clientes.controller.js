@@ -30,7 +30,7 @@ exports.getClientes = async (req, res) => {
             direccion: c.direccion,
             ciudad: c.ciudad,
             fecha_registro: c.fecha_registro,
-            activo: c.User.activo,
+            activo: c.User.activo === 1 || c.User.activo === true,
             plan: c.Plan ? {
                 id: c.Plan.id,
                 nombre: c.Plan.nombre,

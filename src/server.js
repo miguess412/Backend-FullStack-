@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 
 // Importaciones desde las nuevas ubicaciones
 const logger = require('./infrastructure/http/middlewares/logger');
@@ -14,35 +16,54 @@ const authRoutes = require('./infrastructure/http/routes/auth.routes');
 const dashboardRoutes = require('./infrastructure/http/routes/dashboard.routes');
 const clienteRoutes = require('./infrastructure/http/routes/cliente.routes');
 const clientesRoutes = require('./infrastructure/http/routes/admin/clientes.routes');
+const reportesRoutes = require('./infrastructure/http/routes/reportes.routes');
 
+
+// CREAR APLICACIÓN EXPRESS
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 logger.info('🚀 Iniciando servidor ISP-Manager...');
 logger.info('📡 Configurando rutas de la API...');
 
-// Middlewares
+
+// MIDDLEWARES
 app.use(morganMiddleware);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Swagger - Documentación de API
+
+// SERVIDOR DE ARCHIVOS ESTÁTICOS (PDFs)
+// Servir archivos estáticos de la carpeta reports
+const reportsPath = path.join(__dirname, '../reports');
+if (!fs.existsSync(reportsPath)) {
+    fs.mkdirSync(reportsPath, { recursive: true });
+}
+app.use('/reports', express.static(reportsPath));
+
+// Agregar un log para verificar
+logger.info(`📁 Carpeta de reports: ${reportsPath}`);
+
+// SWAGGER - Documentación de API
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 logger.info('📚 Swagger UI disponible en http://localhost:3000/api-docs');
 
-// Rutas de la API
+
+// RUTAS DE LA API
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/cliente', clienteRoutes);
 app.use('/api/admin/clientes', clientesRoutes);
+app.use('/api/reportes', reportesRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
     res.json({ message: '🚀 API de ISP-Manager funcionando' });
 });
 
-// Iniciar servidor
+
+// INICIAR SERVIDOR
 const startServer = async () => {
     try {
         logger.info('🔄 Probando conexión a MySQL...');
@@ -69,7 +90,7 @@ const startServer = async () => {
 
 startServer();
 
-// Manejo de errores no capturados
+// MANEJO DE ERRORES NO CAPTURADOS
 process.on('unhandledRejection', (reason, promise) => {
     logger.error('❌ Unhandled Rejection:', promise, 'reason:', reason);
 });
