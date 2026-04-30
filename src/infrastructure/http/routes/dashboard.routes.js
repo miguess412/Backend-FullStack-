@@ -45,5 +45,6 @@ router.use(isAdmin);
 
 // Obtener estadísticas del dashboard
 router.get('/stats', dashboardController.getStats);
+router.get('/stats-charts', dashboardController.getMonthlyStats);
 
 module.exports = router;

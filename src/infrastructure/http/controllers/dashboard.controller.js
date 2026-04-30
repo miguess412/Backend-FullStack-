@@ -1,5 +1,6 @@
 const { User, Client, Invoice, Ticket, Plan } = require('../../../domain/entities');
 const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
 const logger = require('../../http/middlewares/logger');
 
 // Obtener estadísticas del dashboard
@@ -97,6 +98,73 @@ exports.getStats = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error al obtener estadísticas',
+            error: error.message
+        });
+    }
+};
+
+
+/**
+ * Obtiene estadísticas para gráficas (últimas 6 facturas y planes populares)
+ */
+exports.getMonthlyStats = async (req, res) => {
+    try {
+        // Obtener las últimas 6 facturas ordenadas por fecha de emisión
+        const facturas = await Invoice.findAll({
+            limit: 6,
+            order: [['fecha_emision', 'ASC']],
+            attributes: ['fecha_emision', 'monto', 'estado']
+        });
+
+        // Formatear los datos para el gráfico
+        const labels = facturas.map(f => {
+            const fecha = new Date(f.fecha_emision);
+            return `${fecha.getMonth() + 1}/${fecha.getFullYear()}`;
+        });
+        const pagadas = facturas.map(f => f.estado === 'pagada' ? parseFloat(f.monto) : 0);
+        const pendientes = facturas.map(f => f.estado === 'pendiente' ? parseFloat(f.monto) : 0);
+
+        // Consulta simple para contar clientes por plan (sin usar Sequelize directamente)
+        const planes = await Plan.findAll();
+        const planesPopulares = [];
+        
+        for (const plan of planes) {
+            const count = await Client.count({
+                where: { plan_id: plan.id }
+            });
+            planesPopulares.push({
+                nombre: plan.nombre,
+                total: count
+            });
+        }
+        
+        // Ordenar por total descendente y tomar los 5 más populares
+        planesPopulares.sort((a, b) => b.total - a.total);
+        const topPlanes = planesPopulares.slice(0, 5);
+        
+        const planNames = topPlanes.map(p => p.nombre);
+        const planCounts = topPlanes.map(p => p.total);
+
+        res.json({
+            success: true,
+            data: {
+                facturas: {
+                    labels: labels,
+                    pagadas: pagadas,
+                    pendientes: pendientes
+                },
+                planes: {
+                    labels: planNames,
+                    values: planCounts
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error en dashboard charts:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener estadísticas para gráficas',
             error: error.message
         });
     }
