@@ -18,6 +18,7 @@ const dashboardRoutes = require('./infrastructure/http/routes/dashboard.routes')
 const clienteRoutes = require('./infrastructure/http/routes/cliente.routes');
 const clientesRoutes = require('./infrastructure/http/routes/admin/clientes.routes');
 const reportesRoutes = require('./infrastructure/http/routes/reportes.routes');
+const ticketRoutes = require('./infrastructure/http/routes/ticket.routes');
 
 
 // CREAR APLICACIÓN EXPRESS
@@ -58,6 +59,7 @@ app.use('/api/cliente', clienteRoutes);
 app.use('/api/admin/clientes', clientesRoutes);
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/pago', pagoRoutes);
+app.use('/api/tickets', ticketRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
