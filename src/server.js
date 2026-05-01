@@ -10,6 +10,7 @@ const morganMiddleware = require('./infrastructure/http/middlewares/morgan');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./infrastructure/http/middlewares/swagger');
 const { sequelize, testConnection } = require('./infrastructure/database/sequelize');
+const pagoRoutes = require('./infrastructure/http/routes/pago.routes');
 
 // Importar rutas
 const authRoutes = require('./infrastructure/http/routes/auth.routes');
@@ -56,6 +57,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/cliente', clienteRoutes);
 app.use('/api/admin/clientes', clientesRoutes);
 app.use('/api/reportes', reportesRoutes);
+app.use('/api/pago', pagoRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
