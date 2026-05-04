@@ -14,7 +14,7 @@ exports.getMisTickets = async (req, res) => {
         
         const tickets = await Ticket.findAll({
             where: { cliente_id: client.id },
-            attributes: ['id', 'asunto', 'descripcion', 'estado', 'prioridad', 'respuesta', 'created_at', 'updated_at'], // ← Agregar 'respuesta'
+            attributes: ['id', 'asunto', 'descripcion', 'estado', 'prioridad', 'created_at', 'updated_at'], // ← Agregar 'respuesta'
             order: [['created_at', 'DESC']]
         });
         
@@ -67,7 +67,7 @@ exports.getAllTickets = async (req, res) => {
                     attributes: ['id', 'nombre', 'email']
                 }]
             }],
-            attributes: ['id', 'asunto', 'descripcion', 'estado', 'prioridad', 'respuesta', 'created_at', 'updated_at'], // ← Agregar 'respuesta'
+            attributes: ['id', 'asunto', 'descripcion', 'estado', 'prioridad', 'created_at', 'updated_at'], // ← Agregar 'respuesta'
             order: [['created_at', 'DESC']]
         });
         
@@ -77,7 +77,7 @@ exports.getAllTickets = async (req, res) => {
             descripcion: t.descripcion,
             estado: t.estado,
             prioridad: t.prioridad,
-            respuesta: t.respuesta,  // ← Agregar
+            //respuesta: t.respuesta,  // ← Agregar
             cliente: t.Client?.User?.nombre || 'Desconocido',
             cliente_email: t.Client?.User?.email,
             created_at: t.created_at,
