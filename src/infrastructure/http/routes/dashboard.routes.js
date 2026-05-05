@@ -45,6 +45,18 @@ router.use(isAdmin);
 
 // Obtener estadísticas del dashboard
 router.get('/stats', dashboardController.getStats);
+/**
+ * @swagger
+ * /api/dashboard/stats-charts:
+ *   get:
+ *     summary: Obtener datos para gráficas (facturas y planes)
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Datos formateados para gráficas
+ */
 router.get('/stats-charts', dashboardController.getMonthlyStats);
 
 module.exports = router;
