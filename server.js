@@ -48,6 +48,11 @@ app.get('/', (req, res) => {
     res.json({ message: '🚀 API de ISP-Manager funcionando' });
 });
 
+// Healthcheck endpoint para Docker
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // ============================================
 // INICIAR SERVIDOR
 // ============================================

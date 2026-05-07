@@ -24,6 +24,7 @@ exports.login = async (req, res) => {
         }
 
         const validPassword = await bcrypt.compare(password, user.password_hash);
+        console.log('Contraseña válida?', validPassword); 
         if (!validPassword) {
             logger.warn(`Login fallido - Contraseña incorrecta para: ${email}`);
             // LOG IMPORTANTE EN BD
