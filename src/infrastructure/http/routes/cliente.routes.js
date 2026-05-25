@@ -103,5 +103,8 @@ router.get('/plan', clienteController.getMiPlan);
  *         description: No autorizado
  */
 router.post('/pagar', clienteController.pagarFactura);
+router.put('/perfil', clienteController.actualizarPerfil);
+router.get('/perfil', clienteController.getPerfil);
+router.put('/perfil', clienteController.actualizarPerfil);
 
 module.exports = router;
