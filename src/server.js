@@ -11,6 +11,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./infrastructure/http/middlewares/swagger');
 const { sequelize, testConnection } = require('./infrastructure/database/sequelize');
 const pagoRoutes = require('./infrastructure/http/routes/pago.routes');
+const planRoutes = require('./infrastructure/http/routes/plan.routes');
 
 // Importar rutas
 const authRoutes = require('./infrastructure/http/routes/auth.routes');
@@ -60,6 +61,7 @@ app.use('/api/admin/clientes', clientesRoutes);
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/pago', pagoRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/planes', planRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
