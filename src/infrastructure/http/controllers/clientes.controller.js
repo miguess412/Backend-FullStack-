@@ -165,6 +165,7 @@ exports.eliminarCliente = async (req, res) => {
         const user = await User.findByPk(cliente.user_id);
         const clienteEmail = user?.email || 'desconocido';
         
+        await cliente.destroy();
         await User.destroy({ where: { id: cliente.user_id } });
         
         logger.warn(`🗑️ Cliente ID ${id} eliminado por usuario ${userId}`);

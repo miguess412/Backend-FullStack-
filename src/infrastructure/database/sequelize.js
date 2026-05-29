@@ -1,4 +1,4 @@
-﻿const { Sequelize } = require('sequelize');
+const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
 const sequelize = new Sequelize(
@@ -9,6 +9,12 @@ const sequelize = new Sequelize(
         host: process.env.DB_HOST,
         dialect: 'mysql',
         logging: false, // Cambia a true si quieres ver las consultas SQL
+        pool: {
+            max: 50,
+            min: 5,
+            acquire: 30000,
+            idle: 10000
+        }
     }
 );
 
