@@ -73,10 +73,57 @@ router.get('/plan', clienteController.getMiPlan);
 
 /**
  * @swagger
+ * /api/cliente/consumo:
+ *   get:
+ *     summary: Consultar consumo de internet (HU10)
+ *     description: Retorna las métricas de consumo de datos y ancho de banda del cliente autenticado
+ *     tags: [Cliente]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Métricas de consumo
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/consumo', clienteController.getMiConsumo);
+
+/**
+ * @swagger
+ * /api/cliente/cambiar-plan:
+ *   post:
+ *     summary: Cambiar de plan (HU12)
+ *     description: Permite al cliente autenticado cambiar su plan de internet
+ *     tags: [Cliente]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nuevoPlanId
+ *             properties:
+ *               nuevoPlanId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Plan cambiado exitosamente
+ *       400:
+ *         description: Parámetros inválidos
+ *       404:
+ *         description: Plan no encontrado
+ */
+router.post('/cambiar-plan', clienteController.cambiarMiPlan);
+
+/**
+ * @swagger
  * /api/cliente/pagar:
  *   post:
- *     summary: Pagar factura
- *     description: Realiza el pago de una factura pendiente
+ *     summary: Pagar factura simulada (HU14)
+ *     description: Realiza el pago simulado de una factura pendiente y la registra como pagada
  *     tags: [Cliente]
  *     security:
  *       - bearerAuth: []
@@ -103,7 +150,6 @@ router.get('/plan', clienteController.getMiPlan);
  *         description: No autorizado
  */
 router.post('/pagar', clienteController.pagarFactura);
-router.put('/perfil', clienteController.actualizarPerfil);
 router.get('/perfil', clienteController.getPerfil);
 router.put('/perfil', clienteController.actualizarPerfil);
 
