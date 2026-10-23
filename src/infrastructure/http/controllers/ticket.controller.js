@@ -1,7 +1,7 @@
 const { Ticket, Client, User } = require('../../../domain/entities');
 const logger = require('../../http/middlewares/logger');
 
-/// Obtener tickets del cliente autenticado
+// Obtener tickets del cliente autenticado (HU18, HU20)
 exports.getMisTickets = async (req, res) => {
     try {
         const userId = req.userId;
@@ -14,7 +14,7 @@ exports.getMisTickets = async (req, res) => {
         
         const tickets = await Ticket.findAll({
             where: { cliente_id: client.id },
-            attributes: ['id', 'asunto', 'descripcion', 'estado', 'prioridad', 'created_at', 'updated_at'], // ← Agregar 'respuesta'
+            attributes: ['id', 'asunto', 'descripcion', 'estado', 'prioridad', 'respuesta', 'created_at', 'updated_at'],
             order: [['created_at', 'DESC']]
         });
         
@@ -26,12 +26,16 @@ exports.getMisTickets = async (req, res) => {
     }
 };
 
-// Crear nuevo ticket (cliente)
+// Crear nuevo ticket (cliente - HU17)
 exports.crearTicket = async (req, res) => {
     try {
         const userId = req.userId;
         const { asunto, descripcion, prioridad } = req.body;
         
+        if (!asunto || !descripcion) {
+            return res.status(400).json({ message: 'El asunto y la descripción son obligatorios' });
+        }
+
         const client = await Client.findOne({ where: { user_id: userId } });
         
         if (!client) {
@@ -46,7 +50,7 @@ exports.crearTicket = async (req, res) => {
             estado: 'abierto'
         });
         
-        logger.info(`Nuevo ticket creado: ${ticket.id} por usuario ${userId}`);
+        logger.info(`✅ Nuevo ticket creado: #${ticket.id} por usuario ${userId}`);
         
         res.status(201).json(ticket);
         
@@ -56,7 +60,7 @@ exports.crearTicket = async (req, res) => {
     }
 };
 
-// Obtener todos los tickets (admin)
+// Obtener todos los tickets (admin - HU18, HU20)
 exports.getAllTickets = async (req, res) => {
     try {
         const tickets = await Ticket.findAll({
@@ -67,7 +71,7 @@ exports.getAllTickets = async (req, res) => {
                     attributes: ['id', 'nombre', 'email']
                 }]
             }],
-            attributes: ['id', 'asunto', 'descripcion', 'estado', 'prioridad', 'created_at', 'updated_at'], // ← Agregar 'respuesta'
+            attributes: ['id', 'asunto', 'descripcion', 'estado', 'prioridad', 'respuesta', 'created_at', 'updated_at'],
             order: [['created_at', 'DESC']]
         });
         
@@ -77,7 +81,7 @@ exports.getAllTickets = async (req, res) => {
             descripcion: t.descripcion,
             estado: t.estado,
             prioridad: t.prioridad,
-            //respuesta: t.respuesta,  // ← Agregar
+            respuesta: t.respuesta,
             cliente: t.Client?.User?.nombre || 'Desconocido',
             cliente_email: t.Client?.User?.email,
             created_at: t.created_at,
@@ -92,11 +96,11 @@ exports.getAllTickets = async (req, res) => {
     }
 };
 
-// Actualizar ticket (admin)
+// Actualizar ticket (admin - HU19)
 exports.actualizarTicket = async (req, res) => {
     try {
         const { id } = req.params;
-        const { estado, respuesta } = req.body;
+        const { estado, respuesta, prioridad } = req.body;
         
         const ticket = await Ticket.findByPk(id);
         
@@ -109,12 +113,16 @@ exports.actualizarTicket = async (req, res) => {
         }
         
         if (respuesta !== undefined) {
-            ticket.respuesta = respuesta;  // ← Guardar respuesta
+            ticket.respuesta = respuesta;
+        }
+
+        if (prioridad !== undefined) {
+            ticket.prioridad = prioridad;
         }
         
         await ticket.save();
         
-        logger.info(`Ticket ${id} actualizado - Estado: ${estado}, Respuesta: ${respuesta ? 'Sí' : 'No'}`);
+        logger.info(`✅ Ticket #${id} actualizado - Estado: ${ticket.estado}, Respuesta: ${ticket.respuesta ? 'Sí' : 'No'}`);
         
         res.json(ticket);
         

@@ -25,6 +25,10 @@ const Ticket = sequelize.define('Ticket', {
     prioridad: {
         type: DataTypes.ENUM('baja', 'media', 'alta'),
         defaultValue: 'media'
+    },
+    respuesta: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     tableName: 'tickets_soporte',
