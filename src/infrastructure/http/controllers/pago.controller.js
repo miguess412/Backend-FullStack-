@@ -17,15 +17,20 @@ function client() {
 async function createOrder(monto, facturaId) {
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer("return=representation");
+
+    // Convertir COP a USD representativo si el monto es en pesos (1 USD ≈ 4000 COP)
+    // para que sea compatible con las cuentas sandbox estándar de PayPal ($5,000 USD de saldo)
+    const valorUSD = (Number(monto) > 500) ? (Number(monto) / 4000).toFixed(2) : Number(monto).toFixed(2);
+
     request.requestBody({
         intent: 'CAPTURE',
         purchase_units: [{
             amount: {
                 currency_code: 'USD',
-                value: monto.toString()
+                value: valorUSD.toString()
             },
             reference_id: facturaId.toString(),
-            description: `Pago de factura ISP-Manager #${facturaId}`
+            description: `Pago de factura ISP-Manager #${facturaId} ($${Number(monto).toLocaleString('es-CO')} COP)`
         }],
         application_context: {
             brand_name: 'ISP-Manager',
@@ -67,7 +72,7 @@ exports.crearOrdenPago = async (req, res) => {
 
         logger.info(`Usuario ${userId} solicita pago para factura ${facturaId}`);
 
-        // Verificar que la factura existe
+        // Verificar que la factura existe y pertenece al usuario cliente
         const factura = await Invoice.findByPk(facturaId, {
             include: [{
                 model: Client,
@@ -78,8 +83,8 @@ exports.crearOrdenPago = async (req, res) => {
             }]
         });
 
-        if (!factura) {
-            logger.warn(`Factura ${facturaId} no encontrada`);
+        if (!factura || !factura.Client || !factura.Client.User) {
+            logger.warn(`Factura ${facturaId} no encontrada o no pertenece al usuario ${userId}`);
             return res.status(404).json({ message: 'Factura no encontrada' });
         }
 
@@ -154,8 +159,8 @@ exports.capturarPago = async (req, res) => {
             }]
         });
 
-        if (!factura) {
-            console.log('ERROR: Factura no encontrada en BD');
+        if (!factura || !factura.Client || !factura.Client.User) {
+            console.log('ERROR: Factura no encontrada o no pertenece al usuario');
             return res.status(404).json({ message: 'Factura no encontrada' });
         }
         console.log('Factura encontrada, estado actual:', factura.estado);
