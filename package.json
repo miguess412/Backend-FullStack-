@@ -4,7 +4,7 @@
   "description": "API REST para el sistema de gestión ISP-Manager.",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --forceExit",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "dev": "nodemon src/server.js",

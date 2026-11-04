@@ -20,6 +20,7 @@ const clienteRoutes = require('./infrastructure/http/routes/cliente.routes');
 const clientesRoutes = require('./infrastructure/http/routes/admin/clientes.routes');
 const reportesRoutes = require('./infrastructure/http/routes/reportes.routes');
 const ticketRoutes = require('./infrastructure/http/routes/ticket.routes');
+const backupRoutes = require('./infrastructure/http/routes/admin/backup.routes');
 
 
 // CREAR APLICACIÓN EXPRESS
@@ -62,6 +63,7 @@ app.use('/api/reportes', reportesRoutes);
 app.use('/api/pago', pagoRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/planes', planRoutes);
+app.use('/api/admin/backups', backupRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -99,7 +101,11 @@ const startServer = async () => {
     }
 };
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
+}
+
+module.exports = app;
 
 // MANEJO DE ERRORES NO CAPTURADOS
 process.on('unhandledRejection', (reason, promise) => {
